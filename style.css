@@ -79,6 +79,9 @@ header .header-title a{
     color:var(--ice-color);
     font-size: .9rem;
 }
+header .header-text{
+    text-align: center;
+}
 .search{
     display: flex;
     justify-content: center;
@@ -114,7 +117,7 @@ header .header-title a{
 .github-card{
     max-width: 800px;
     margin: auto;
-    display: grid;
+    display: none;
     grid-template-columns: repeat(3,auto 1fr 1fr);
     grid-template-rows: repeat(2,1fr,auto);
     background: var(--black-background);
@@ -123,6 +126,30 @@ header .header-title a{
     border-radius: 18px;
     position: relative;
 
+}
+.error-msg{
+    grid-column: 1/-1;
+    grid-row: 1/-1;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap:1rem;
+}
+.error-msg i{
+    color:red;
+    font-size: clamp(2rem,2vw,3rem);
+}
+.error-msg div h3{
+    color:red;
+}
+.error-msg div p{
+    color:var(--text-color);
+}
+.github-card .img{
+    background-color: var(--black-background);
+    border-radius: 50%;
+    overflow: hidden;
+    border:var(--border) solid 1px;
 }
 .github-card img{
     width:100%;
@@ -145,7 +172,7 @@ header .header-title a{
     justify-content: space-between;
     align-items: center;
 }
-.github-card .card-content .card-description button{
+.github-card .card-content .card-description a{
     background: transparent;
     border: var(--border) 1px solid;
     padding:10px;
@@ -199,6 +226,9 @@ header .header-title a{
     }
 }
 /* REPOSITORY */
+.github-repos .search{
+    max-width:100%;
+}
 .filter-repos{
     margin:1rem;
 }
@@ -239,7 +269,8 @@ header .header-title a{
     gap:.3rem;
     align-items: center;
 }
-.repo-head .repo-name h3{
+.repo-head .repo-name h3,
+.github-card h3{
     color:var(--ice-color);
 }
 .repo-head .repo-type{
@@ -259,4 +290,16 @@ header .header-title a{
     justify-content: center;
     align-items: center;
     gap:.2rem;
+}
+.error{
+    animation: error 0.5s;
+}
+@keyframes error{
+    0%{
+        translate: 50px 0;
+    }
+    50%{
+        translate: -50px 0;
+    }
+    100%{ translate: 0;}
 }
