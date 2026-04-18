@@ -38,11 +38,11 @@ h1{
     color:var(--title-color);
 }
 h2{
-    font-size: clamp(1.5rem ,4vw,2.5rem);
+    font-size: clamp(1rem ,4vw,1.5rem);
     color:var(--title-color);
 }
 h3{
-    font-size: clamp(1rem ,5vw,1.5rem);
+    font-size: 1rem;
     color:var(--title-color);
 }
 p,div{
@@ -128,7 +128,7 @@ header .header-title a{
     width:100%;
     max-width: 200px;
 }
-.github-card h3{
+.github-card h2{
     font-weight: bolder;
     text-decoration:underline ;
 }
@@ -197,4 +197,66 @@ header .header-title a{
         border-radius: 50%;
         overflow: hidden;
     }
+}
+/* REPOSITORY */
+.filter-repos{
+    margin:1rem;
+}
+.filter-btn{
+    padding:.6rem 1rem;
+    background-color: transparent;
+    border:var(--border) solid 1px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin:.2rem;
+}
+.filter-btn.active{
+    background-color: var(--activeTabs-color);
+    color:var(--black-background);
+}
+.repo-main{
+    display: flex;
+    gap:1rem;
+    flex-wrap: wrap;
+
+}
+.repo-main .repo-card{
+    background-color: var(--black-background);
+    padding: 1rem;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap:1.5rem;
+    flex:1 1 300px;
+}
+.repo-main .repo-card .repo-head{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.repo-head .repo-name{
+    display: flex;
+    gap:.3rem;
+    align-items: center;
+}
+.repo-head .repo-name h3{
+    color:var(--ice-color);
+}
+.repo-head .repo-type{
+    border: var(--border) solid 1px;
+    padding:3px 7px;
+    border-radius: 8px;
+}
+.repo-name i{
+    font-size: 1rem;
+}
+.repo-card .repo-footer{
+    display: flex;
+    gap:2rem;
+}
+.repo-card .repo-footer div{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap:.2rem;
 }
