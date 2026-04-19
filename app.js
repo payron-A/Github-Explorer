@@ -5,6 +5,7 @@ const headerSearchIpt = document.getElementById("headerSearchIpt");
 const headerSearchBtn = document.querySelector(".header-search-btn");
 const searchRepos = document.getElementById("searchRepos");
 const githubRepos = document.querySelector(".github-repos");
+let repoMain = document.querySelector(".repo-main");
 const githubCard = document.querySelector(".github-card");
 
 //==========
@@ -12,34 +13,52 @@ const githubCard = document.querySelector(".github-card");
 //==========
 async function getGithubApi(accountName){
     try{
+        defaultView();
+        githubCard.innerHTML = "Loading...";
         const rs = await fetch(`https://api.github.com/users/${accountName}`);
+        if(!rs.ok){
+            if(rs.status == 403){
+                throw new Error("Api limit exceeded!, Try later");
+            }else{
+                throw new Error('User not found!');
+            }
+            return;
+        }
         const data = await rs.json();
-        // click event to show the card
-        headerSearchBtn.onclick =()=>{
-            if(rs.ok)showCardData(data);
-            else{showError(`Enter the exact name`)}
-        }  
+        showCardData(data);
+        getRepoApi(accountName);
     }catch(error){
-        showError(error);
+        showError(error.message);
     }
-
+}
+//==========
+// FETCH GITHUB REPOS
+//==========
+async function getRepoApi(accountName){
+    try{
+        const rs = await fetch(`https://api.github.com/users/${accountName}/repos`);
+        if(!rs.ok){
+            return;
+        }
+        const data = await rs.json();
+        showRepoData(data);
+    }catch(error){
+        console.log(error.message)
+    }
 }
 //==========
 // GET DATA
 //==========
 // keyup event to fetch the data when the user write;
-headerSearchIpt.onkeyup =()=> {
+headerSearchBtn.onclick =()=> {
     getGithubApi(headerSearchIpt.value.trim());
 }
 //==========
 // SHOW HTML CARD
 //==========
 function showCardData(data){
-    githubCard.style.border = "var(--border) solid 1px";
-    githubCard.textContent = "";
-    let createdAt = data.created_at.split("-");
-    let day = new Date();
-    githubCard.style.display = "grid";
+    
+    defaultView()
     githubCard.innerHTML =`
         <div class="img">
                 <img src=${data.avatar_url}id="githubImg" alt="Profile Photo">
@@ -55,7 +74,7 @@ function showCardData(data){
                         <span>View Profile</span>
                     </a>
                 </div>
-                <p>${!data.bio?`${data.name} dosent wrote an bio ...`:data.bio}</p>
+                <p>${!data.bio?`${data.name} did not write a bio ...`:data.bio}</p>
                                 <div class="meta-items">
                     <span class="meta-item">
                         <i class="fa-solid fa-location-pin"></i>
@@ -67,12 +86,7 @@ function showCardData(data){
                     </span>
                     <span class="meta-item">
                         <i class="fa-solid fa-clock"></i>
-                        <span>${
-                                    (day.getFullYear() - Number(createdAt[0])) == 0 
-                                    ? day.getMonth() - Number(createdAt[1]) + "m ago"
-                                    : day.getFullYear() - Number(createdAt[0])+"y ago"
-                            }
-                        </span>
+                        <span>${getDay(data.created_at)}</span>
                     </span>
                 </div>
             </div>
@@ -110,30 +124,72 @@ function showCardData(data){
 //==========
 // SHOW THE ERRORS
 //==========
+function defaultView(){
+    githubCard.style.display = "grid";
+    githubCard.style.background = "var(--black-background)";
+    githubCard.style.border = "var(--border) solid 1px";
+    githubCard.textContent = "";
+    githubCard.classList.remove("error-msg-animation");
 
+}
 function showError(error){
-    // githubCard.textContent = "";
-    // githubCard.style.display = "grid";
+    defaultView();
+    const div = document.createElement("div");
+    div.classList.add("error-msg");
+    const WrongIcon = document.createElement("div");
+    WrongIcon.innerHTML =`
+            <i class="fa-solid fa-circle-xmark"></i>
+            <span style="color:red">Wrong</span>
+    `;
+    const msg = document.createElement("div");
+    msg.textContent = error;
+    div.append(WrongIcon);
+    div.append(msg);
+    githubCard.append(div);
+    githubCard.style.background = "var(--error-msg-background)";
+    githubCard.classList.add("error-msg-animation");
     
-    // githubCard.classList.add('error')
-    // let h3 = document.createElement("h3");
-    // let ErrorDiv = document.createElement("div");
-    // h3.textContent = "Opss";
-    // h3.style.color = "var(--title-color)";
-    // h3.style.gridColumn= "1/-1";
-    // ErrorDiv.style.color = "red";
-    // ErrorDiv.textContent = error;
-    // githubCard.append(h3);
-    // githubCard.append(ErrorDiv);
-    githubCard.innerHTML = `
-        <div class="error-msg">
-                <i class="fa-solid fa-exclamation"></i>
-                <div>
-                    <h3>Opss</h3>
-                    <p>Lorem ipsum dolor sit amet.</p>
-                </div>
-        </div>
-    `
-    githubCard.style.border = "red solid 3px";
-    githubCard.style.background = "rgba(255, 0, 0, 0.222)";
+}
+function getDay(date){
+    const createdAt = new Date(date);
+    const currentDate = new Date();
+    const diffMs = currentDate - createdAt;
+    const diffDays = Math.floor(diffMs/ (1000 *60 *60 * 24));
+    const diffMonths = Math.floor(diffDays / 30);
+    const diffyears= Math.floor(diffDays / 365);
+    if(diffyears > 0)return diffyears +"y";
+    else if(diffMonths > 0)return diffMonths +"m";
+    else if(diffDays == 0){
+        return "This day"
+    }
+    return diffDays +"d";
+}
+function showRepoData(data){
+    githubRepos.style.display = "block";
+    repoMain.innerHTML = data.map(repo =>`
+            <div class="repo-card">
+                    <div class="repo-head">
+                        <div class="repo-name">
+                            <i class="fa-solid fa-folder-closed"></i>
+                            <h3>${repo.name}</h3>
+                        </div>
+                        <div class="repo-type">${repo.owner.user_view_type}</div>
+                    </div>
+                    <div class="repo-bio">${!repo.description?repo.name+"...":repo.description}</div>
+                    <div class="repo-footer">
+                        <div class="repo-language">
+                            <i class="fa-solid fa-circle"style="color:white"></i>
+                            <p>${!repo.language?"No language":repo.language}</p>
+                        </div>
+                        <div class="repo-stars">
+                            <i class="fa-solid fa-star"></i>
+                            <p>${repo.stargazers_count}</p>
+                        </div>
+                        <div class="repo-work">
+                            <i class="fa-solid fa-clock"></i>
+                            <p>${getDay(repo.pushed_at)}</p>
+                        </div>
+                    </div>
+            </div>
+        `).join("")
 }

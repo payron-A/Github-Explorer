@@ -17,6 +17,8 @@
     --activeTabs-color:#00bfa5;
     --icon-color:#9e9e9e;
     --black-background:#0d0d0d;
+    --error-msg:red;
+    --error-msg-background:rgba(255, 20, 0, 0.585);
 }
 
 ::selection{
@@ -131,20 +133,17 @@ header .header-text{
     grid-column: 1/-1;
     grid-row: 1/-1;
     display: flex;
-    justify-content: flex-start;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    gap:1rem;
+    gap:1.5rem;
 }
-.error-msg i{
-    color:red;
-    font-size: clamp(2rem,2vw,3rem);
+.error-msg i,
+.error-msg span{
+    color:var(--error-msg);
+    font-size: clamp(1.8rem,1.8vw,2rem);
 }
-.error-msg div h3{
-    color:red;
-}
-.error-msg div p{
-    color:var(--text-color);
-}
+
 .github-card .img{
     background-color: var(--black-background);
     border-radius: 50%;
@@ -226,6 +225,9 @@ header .header-text{
     }
 }
 /* REPOSITORY */
+.github-repos{
+    display: none;
+}
 .github-repos .search{
     max-width:100%;
 }
@@ -291,10 +293,10 @@ header .header-text{
     align-items: center;
     gap:.2rem;
 }
-.error{
-    animation: error 0.5s;
+.error-msg-animation{
+    animation: error-msg-animation 0.5s;
 }
-@keyframes error{
+@keyframes error-msg-animation{
     0%{
         translate: 50px 0;
     }
