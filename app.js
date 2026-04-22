@@ -4,9 +4,12 @@
 const headerSearchIpt = document.getElementById("headerSearchIpt");
 const headerSearchBtn = document.querySelector(".header-search-btn");
 const searchRepos = document.getElementById("searchRepos");
+const filterBtns = document.querySelector(".filter-repos");
 const githubRepos = document.querySelector(".github-repos");
 let repoMain = document.querySelector(".repo-main");
 const githubCard = document.querySelector(".github-card");
+let RepodataCP;
+let varStarredFilter;
 
 //==========
 // FETCH GITHUB DATA
@@ -14,7 +17,7 @@ const githubCard = document.querySelector(".github-card");
 async function getGithubApi(accountName){
     try{
         defaultView();
-        githubCard.innerHTML = "Loading...";
+        loading();
         const rs = await fetch(`https://api.github.com/users/${accountName}`);
         if(!rs.ok){
             if(rs.status == 403){
@@ -41,6 +44,7 @@ async function getRepoApi(accountName){
             return;
         }
         const data = await rs.json();
+        RepodataCP = data;
         showRepoData(data);
     }catch(error){
         console.log(error.message)
@@ -57,8 +61,7 @@ headerSearchBtn.onclick =()=> {
 // SHOW HTML CARD
 //==========
 function showCardData(data){
-    
-    defaultView()
+    defaultView();
     githubCard.innerHTML =`
         <div class="img">
                 <img src=${data.avatar_url}id="githubImg" alt="Profile Photo">
@@ -160,7 +163,7 @@ function getDay(date){
     if(diffyears > 0)return diffyears +"y";
     else if(diffMonths > 0)return diffMonths +"m";
     else if(diffDays == 0){
-        return "This day"
+        return "Today";
     }
     return diffDays +"d";
 }
@@ -191,5 +194,63 @@ function showRepoData(data){
                         </div>
                     </div>
             </div>
-        `).join("")
+        `).join("");
 }
+//==========
+// SEARCH REPOS
+//==========
+searchRepos.onkeyup = ()=>{
+    searchRepo(RepodataCP);
+}
+function searchRepo(data){
+    let searchValue = searchRepos.value.toLowerCase().trim();
+    let filterData = data.filter(repo => repo.name.toLowerCase().includes(searchValue));
+    showRepoData(filterData);
+}
+//==========
+// FILTER THE REPOS
+//==========
+//sterred
+filterBtns.onclick = (e)=>{
+    switchActive(e);
+    const searchtype = e.target.dataset.searchtype;
+    switch(searchtype){
+        case "all":
+            showRepoData(RepodataCP);
+            break;
+        case "starred":
+            starredFilter();
+            break;
+    }
+}
+function starredFilter(){
+    const sorted = [...RepodataCP].sort((a,b)=>
+        b.stargazers_count - a.stargazers_count
+    );
+    showRepoData(sorted); 
+}
+//==========
+// SWITCH ACTIVE
+//==========
+function switchActive(e){
+        document.querySelectorAll("[data-searchType]").forEach(element =>{
+            element.classList.remove("active");
+        })
+        e.target.classList.add("active");
+}
+function loading(){
+    githubCard.innerHTML = `
+                <div class="loader">
+                  <div class="arc"></div>
+                  <div class="robot">
+                    <svg viewBox="0 0 760 760" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="760" height="760" fill="#0a0a0a"/>
+                      <circle cx="380" cy="340" r="290" fill="#f5f5f5"/>
+                      <path d="M 310 580 Q 310 490 340 465 Q 355 455 380 450 Q 405 455 420 465 Q 450 490 450 580 Z" fill="#0a0a0a"/>
+                      <ellipse cx="380" cy="320" rx="175" ry="118" fill="#0a0a0a"/>
+                      <ellipse cx="308" cy="325" rx="48" ry="52" fill="#f5f5f5"/>
+                      <ellipse cx="452" cy="325" rx="48" ry="52" fill="#f5f5f5"/>
+                    </svg>
+                  </div>
+                </div>`
+    }
