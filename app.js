@@ -1,22 +1,23 @@
 //==========
-// ELEMENTS
+// HEAD & CARD ELEMENTS
 //==========
 const headerSearchIpt = document.getElementById("headerSearchIpt");
 const headerSearchBtn = document.querySelector(".header-search-btn");
+const githubCard = document.querySelector(".github-card");
+//==========
+// REPOS ELEMENT
+//==========
 const searchRepos = document.getElementById("searchRepos");
 const filterBtns = document.querySelector(".filter-repos");
 const githubRepos = document.querySelector(".github-repos");
 let repoMain = document.querySelector(".repo-main");
-const githubCard = document.querySelector(".github-card");
-let RepodataCP;
-let varStarredFilter;
-
+let RepodataCP;// copy data(well use it before fitching card data);
 //==========
 // FETCH GITHUB DATA
 //==========
 async function getGithubApi(accountName){
     try{
-        defaultView();
+        defaulCardView();
         loading();
         const rs = await fetch(`https://api.github.com/users/${accountName}`);
         if(!rs.ok){
@@ -31,7 +32,7 @@ async function getGithubApi(accountName){
         showCardData(data);
         getRepoApi(accountName);
     }catch(error){
-        showError(error.message);
+        showCardError(error.message);
     }
 }
 //==========
@@ -41,13 +42,14 @@ async function getRepoApi(accountName){
     try{
         const rs = await fetch(`https://api.github.com/users/${accountName}/repos`);
         if(!rs.ok){
+            throw new Error("Something wrong!!");
             return;
         }
         const data = await rs.json();
         RepodataCP = data;
         showRepoData(data);
     }catch(error){
-        console.log(error.message)
+        showRepoError(error.message);
     }
 }
 //==========
@@ -61,7 +63,7 @@ headerSearchBtn.onclick =()=> {
 // SHOW HTML CARD
 //==========
 function showCardData(data){
-    defaultView();
+    defaulCardView();
     githubCard.innerHTML =`
         <div class="img">
                 <img src=${data.avatar_url}id="githubImg" alt="Profile Photo">
@@ -77,15 +79,15 @@ function showCardData(data){
                         <span>View Profile</span>
                     </a>
                 </div>
-                <p>${!data.bio?`${data.name} did not write a bio ...`:data.bio}</p>
+                <p>${data.bio} || ${data.name} did not write a bio... </p>
                                 <div class="meta-items">
                     <span class="meta-item">
                         <i class="fa-solid fa-location-pin"></i>
-                        <span>${!data.location?'No location':data.location}</span>
+                        <span>${data.location || "No location"}</span>
                     </span>
                     <span class="meta-item">
                         <i class="fa-solid fa-comment"></i>
-                        <span>${!data.email?"No Email":data.email}</span>
+                        <span>${data.email || "No Email"}</span>
                     </span>
                     <span class="meta-item">
                         <i class="fa-solid fa-clock"></i>
@@ -125,9 +127,9 @@ function showCardData(data){
             </div>`
 }
 //==========
-// SHOW THE ERRORS
+// DEFAUT VIEW
 //==========
-function defaultView(){
+function defaulCardView(){
     githubCard.style.display = "grid";
     githubCard.style.background = "var(--black-background)";
     githubCard.style.border = "var(--border) solid 1px";
@@ -135,8 +137,11 @@ function defaultView(){
     githubCard.classList.remove("error-msg-animation");
 
 }
-function showError(error){
-    defaultView();
+//==========
+// SHOW CARD ERRORS
+//==========
+function showCardError(error){
+    defaulCardView();
     const div = document.createElement("div");
     div.classList.add("error-msg");
     const WrongIcon = document.createElement("div");
@@ -153,13 +158,38 @@ function showError(error){
     githubCard.classList.add("error-msg-animation");
     
 }
+//==========
+// SHOW REPO ERRORS
+//==========
+function showRepoError(error){
+    githubRepos.style.display = "block";
+    const div = document.createElement("div");
+    div.classList.add("error-msg");
+    const WrongIcon = document.createElement("div");
+    WrongIcon.innerHTML =`
+            <i class="fa-solid fa-circle-xmark"></i>
+            <span style="color:red">Wrong</span>
+    `;
+    const msg = document.createElement("div");
+    msg.textContent = error;
+    div.append(WrongIcon);
+    div.append(msg);
+    githubRepos.append(div);
+    githubRepos.style.background = "var(--error-msg-background)";
+    githubRepos.classList.add("error-msg-animation");
+    
+}
+//==========
+// GET DAY
+//==========
+// get created account date & last work in repo
 function getDay(date){
     const createdAt = new Date(date);
     const currentDate = new Date();
-    const diffMs = currentDate - createdAt;
-    const diffDays = Math.floor(diffMs/ (1000 *60 *60 * 24));
-    const diffMonths = Math.floor(diffDays / 30);
-    const diffyears= Math.floor(diffDays / 365);
+    const diffMs = currentDate - createdAt;// get the date by "ms";
+    const diffDays = Math.floor(diffMs/ (1000 *60 *60 * 24));// convert it to days;
+    const diffMonths = Math.floor(diffDays / 30);//to months;
+    const diffyears= Math.floor(diffDays / 365);//to years;
     if(diffyears > 0)return diffyears +"y";
     else if(diffMonths > 0)return diffMonths +"m";
     else if(diffDays == 0){
@@ -167,7 +197,11 @@ function getDay(date){
     }
     return diffDays +"d";
 }
+//==========
+// SHOW THE REPOS
+//==========
 function showRepoData(data){
+    // make the repos area visibal;
     githubRepos.style.display = "block";
     repoMain.innerHTML = data.map(repo =>`
             <div class="repo-card">
@@ -197,37 +231,49 @@ function showRepoData(data){
         `).join("");
 }
 //==========
-// SEARCH REPOS
+// SEARCH REPOS EVENT
 //==========
+// auto focus:
+window.onload =()=>{
+    headerSearchIpt.focus();
+}
+// keyup event:
 searchRepos.onkeyup = ()=>{
     searchRepo(RepodataCP);
 }
+//==========
+// SEARCH REPOS
+//==========
 function searchRepo(data){
     let searchValue = searchRepos.value.toLowerCase().trim();
+    // filter the repos that has the same value of the input:
     let filterData = data.filter(repo => repo.name.toLowerCase().includes(searchValue));
     showRepoData(filterData);
 }
 //==========
 // FILTER THE REPOS
 //==========
-//sterred
 filterBtns.onclick = (e)=>{
     switchActive(e);
     const searchtype = e.target.dataset.searchtype;
     switch(searchtype){
-        case "all":
-            showRepoData(RepodataCP);
+        case "all":// all(dafault)
+            showRepoData(RepodataCP);//use the copy data(the origin data was changed)
             break;
-        case "starred":
+        case "starred":// from the biggest repo stars to last one
             starredFilter();
             break;
     }
 }
+//==========
+// FILTER THE REPOS (starred)
+//==========
 function starredFilter(){
+    //use sort method to replace the repos by stars number
     const sorted = [...RepodataCP].sort((a,b)=>
         b.stargazers_count - a.stargazers_count
     );
-    showRepoData(sorted); 
+    showRepoData(sorted);
 }
 //==========
 // SWITCH ACTIVE
@@ -238,6 +284,9 @@ function switchActive(e){
         })
         e.target.classList.add("active");
 }
+//==========
+// LOADING LOGO WHEN FITCH DATA
+//==========
 function loading(){
     githubCard.innerHTML = `
                 <div class="loader">
@@ -253,4 +302,4 @@ function loading(){
                     </svg>
                   </div>
                 </div>`
-    }
+}

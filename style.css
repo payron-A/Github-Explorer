@@ -114,6 +114,22 @@ header .header-text{
     border-radius: 8px;
     border:var(--border) 2px solid;
     cursor: pointer;
+    position:relative;
+    overflow: hidden;
+}
+.search-button .fa-sistrix{
+    position: absolute;
+    font-size: 1.4rem;
+    padding:2px 0;
+    color:var(--title-color);
+    background: var(--ice-color);
+    top:0px;
+    right: -80%;
+    width: 100%;
+    height: 100%;
+}
+.search-button:hover .fa-sistrix{
+    right:0;
 }
 /* GITHUB CARD */
 .github-card{
@@ -206,6 +222,7 @@ header .header-text{
     color:var(--title-color);
     font-weight: bolder;
 }
+/* Responsive card & Text */
 @media (max-width:780px){
     html{
         font-size: 14px;
@@ -293,19 +310,7 @@ header .header-text{
     align-items: center;
     gap:.2rem;
 }
-.error-msg-animation{
-    animation: error-msg-animation 0.5s;
-}
-@keyframes error-msg-animation{
-    0%{
-        translate: 50px 0;
-    }
-    50%{
-        translate: -50px 0;
-    }
-    100%{ translate: 0;}
-}
-/* LOADING */
+/* LOADING LOGO*/
 .loader {
   position: relative;
   width: 120px;
@@ -339,4 +344,17 @@ header .header-text{
 @keyframes pulse {
   0%, 100% { opacity: 1;   transform: scale(1); }
   50%       { opacity: .7; transform: scale(.94); }
+}
+/* ERROR MSG */
+.error-msg-animation{
+    animation: error-msg-animation 0.5s;
+}
+@keyframes error-msg-animation{
+    0%{
+        translate: 50px 0;
+    }
+    50%{
+        translate: -50px 0;
+    }
+    100%{ translate: 0;}
 }
